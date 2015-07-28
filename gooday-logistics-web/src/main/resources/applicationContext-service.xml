@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:d="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!--公共部分-->
+    <d:application name="gooday-logistics-web" owner="jsh" organization="gooday"/>
+    <!--dubbo:registry address="zookeeper://192.168.0.240:2181"/-->
+    <d:registry address="zookeeper://localhost:2181"/>
+
+    <!--物流信息查询 示例-->
+    <d:reference id="LsOrderService" interface="cn.gooday.logistics.api.service.LsOrderService" version="1.0.0"/>
+    
+    
+    <d:reference id="hmModelDatasetMppingIntService" interface="cn.gooday.logistics.api.service.HmModelDatasetMppingIntService" version="1.0"/>
+    
+</beans>

@@ -1,0 +1,407 @@
+///**
+// * 巨商汇平台 版权所有 Copyright@2014
+// */
+//package cn.gooday.service.common.util;
+//
+//import cn.gooday.framework.dao.DatabaseHelper;
+//import cn.gooday.framework.orm.DataSet;
+//import cn.gooday.framework.orm.NDataSet;
+//import cn.gooday.framework.tx.annotation.Transaction;
+//import cn.gooday.service.common.entity.serialnumber.SerialNumberGenerateEntity;
+//
+//import java.util.HashMap;
+//import java.util.Map;
+//import java.util.Random;
+//
+///**
+// * [流水号 单号 工具类，获取单号时当获取失败时返回 ""]
+// *
+// * @ProjectName: [gooday-services]
+// * @Author: [zhangzhowei]
+// * @CreateDate: [2015/3/30 16:46]
+// * @Update: [说明本次修改内容] BY[zhangzhouwei][2015/3/30]
+// * @Version: [v1.0]
+// */
+//public class SequenceUtil {
+//    /**
+//     * 金融大类
+//     */
+//    //private static final String CAT_FINANCE_MAIN = "11";//金融大类
+//    private static final String CAT_FINANCE_SUB_DEAL = "1101";//金融-交易
+//    private static final String CAT_FINANCE_SUB_PAY = "1102";//金融-支付
+//    private static final String CAT_FINANCE_SUB_PAYRETURN = "1103";//金融-支付退回
+//    private static final String CAT_FINANCE_SUB_CHARGE = "1104";//金融-充值
+//    private static final String CAT_FINANCE_SUB_CHARGERETURN = "1105";//金融-充值退回
+//    private static final String CAT_FINANCE_SUB_CASH = "1106";//金融-提现
+//
+//    /**
+//     * 服务商
+//     */
+//    //private static final String CAT_COMPANY_MAIN = "12";//各类服务商大类
+//    private static final String CAT_COMPANY_SUB_JST = "1201";//巨商通
+//    private static final String CAT_COMPANY_SUB_AFTERSALE = "1202";//售后
+//    private static final String CAT_COMPANY_SUB_PAY = "1203";//支付服务
+//
+//    /**
+//     * 各类单证
+//     */
+//    //private static final String CAT_DOC_MAIN = "13";//各类单证编号
+//    private static final String CAT_DOC_SUB_SO = "P";//SO订单
+//    private static final String CAT_DOC_SUB_PO = "R";//PO采购单
+//    private static final String CAT_DOC_SUB_SI = "S";//SI发货单
+//    private static final String CAT_DOC_SUB_D = "D";//退款单
+//    private static final String CAT_DOC_SUB_T = "T";//投诉单
+//    private static final String CAT_DOC_SUB_G = "G";//组合活动编号
+//    private static final String CAT_DOC_SUB_B = "B";//捆绑活动编号
+//
+//
+//    private static final int SEQUENCE_LEN = 6;//流水号限制取六位
+//    private static final int RANDOM_LEN = 2;//随机数限制取两位
+//
+//
+//    /**
+//     * 获取交易流水号（18位） 日期(6位)+分类(2位)+类别(2位)+流水(6位)+随机码(2位) 分类：11，类别：01，流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getDealNumber() {
+//        try {
+//            return numberHelp(CAT_FINANCE_SUB_DEAL, DateUtil.getTodayYYMMDD(), CAT_FINANCE_SUB_DEAL);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 提现流水号（18位） 日期(6位)+分类(2位)+类别(2位)+流水(6位)+随机码(2位) 分类：11，类别：06，流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getPayNumber() {
+//        try {
+//            return numberHelp(CAT_FINANCE_SUB_CASH, DateUtil.getTodayYYMMDD(), CAT_FINANCE_SUB_CASH);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 充值流水号（18位） 日期(6位)+分类(2位)+类别(2位)+流水(6位)+随机码(2位) 分类：11，类别：04，流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getRECNumber() {
+//        try {
+//            return numberHelp(CAT_FINANCE_SUB_CHARGE, DateUtil.getTodayYYMMDD(), CAT_FINANCE_SUB_CHARGE);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 充值退回流水号（18位） 日期(6位)+分类(2位)+类别(2位)+流水(6位)+随机码(2位) 分类：11，类别：05，流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getRECReturnNumber() {
+//        try {
+//            return numberHelp(CAT_FINANCE_SUB_CHARGERETURN, DateUtil.getTodayYYMMDD(), CAT_FINANCE_SUB_CHARGERETURN);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     *  支付退款流水号（18位） 日期(6位)+分类(2位)+类别(2位)+流水(6位)+随机码(2位) 分类：11，类别：03，流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getOrderPayReturnNumber() {
+//        try {
+//            return numberHelp(CAT_FINANCE_SUB_PAYRETURN, DateUtil.getTodayYYMMDD(), CAT_FINANCE_SUB_PAYRETURN);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     *  支付流水号（18位） 日期(6位)+分类(2位)+类别(2位)+流水(6位)+随机码(2位) 分类：11，类别：02，流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getOrderPayNumber() {
+//        try {
+//            return numberHelp(CAT_FINANCE_SUB_PAY, DateUtil.getTodayYYMMDD(), CAT_FINANCE_SUB_PAY);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     *  售后服务商编号（12位） 分类(2)+类别(2)+流水号(6)+随机码(2) 分类：12，类别：02,流水从000001开始累计
+//     * @return
+//     */
+//    public static String getAfterSaleCompanyNumber() {
+//        try {
+//            return numberHelp(CAT_COMPANY_SUB_AFTERSALE, CAT_COMPANY_SUB_AFTERSALE);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     *  支付服务商编号（12位） 分类(2)+类别(2)+流水号(6)+随机码(2) 分类：12，类别：03,流水从000001开始累计
+//     * @return
+//     */
+//    public static String getPayServiceCompanyNumber() {
+//        try {
+//            return numberHelp(CAT_COMPANY_SUB_PAY, CAT_COMPANY_SUB_PAY);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 巨商通编号（12位） 分类(2)+类别(2)+流水号(6)+随机码(2) 分类：12，类别：01,流水从000001开始累计
+//     * @return
+//     */
+//    public static String getJSTNumber() {
+//        try {
+//            return numberHelp(CAT_COMPANY_SUB_JST, CAT_COMPANY_SUB_JST);
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//
+//    /**
+//     * PO订单编号（15位） R+日期(6)+流水号(6)+随机码(2) 流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getPONumber() {
+//        try {
+//            return numberHelp(CAT_DOC_SUB_PO, CAT_DOC_SUB_PO, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * SO订单编号（15位） P+日期(6)+流水号(6)+随机码(2) 流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getSONumber(){
+//        try {
+//            return numberHelp(CAT_DOC_SUB_SO, CAT_DOC_SUB_SO, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 发货单号（15位） S+日期(6)+流水号(6)+随机码(2) 流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getSINumber() {
+//        try {
+//            return numberHelp(CAT_DOC_SUB_SI, CAT_DOC_SUB_SI, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 投诉单号（15位） T+日期(6)+流水号(6)+随机码(2) 流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getIUNumber() {
+//        try {
+//            return numberHelp(CAT_DOC_SUB_T, CAT_DOC_SUB_T, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 退款单号（15位） D+日期(6)+流水号(6)+随机码(2) 流水依照每天从000001开始，日期：YYMMDD
+//     * @return
+//     */
+//    public static String getRechargeReturnNumber() {
+//        try {
+//            return numberHelp(CAT_DOC_SUB_D, CAT_DOC_SUB_D, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//    /**
+//     * 组合活动编号，G开头，年月日，六位流水号； G141027000001XX
+//     * @return
+//     */
+//    public static String getGNumber() {
+//        try {
+//            return numberHelp(CAT_DOC_SUB_G, CAT_DOC_SUB_G, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//    /**
+//     * 捆绑销售活动编号，B开头，年月日，六位流水号； G141027000001XX
+//     * @return
+//     */
+//    public static String getBNumber() {
+//        try {
+//            return numberHelp(CAT_DOC_SUB_B, CAT_DOC_SUB_B, DateUtil.getTodayYYMMDD());
+//        }catch (Exception e){
+//            LogUtil.err(e);
+//            return "";
+//        }
+//    }
+//
+//
+//    /**
+//     * 返回0.01~0.05的随机数
+//     * @return
+//     */
+//    public String getVerifyMoney() {
+//        int randNum = (int) (Math.random()*10);
+//        if(randNum>5){
+//            randNum = randNum/2;
+//        }
+//        if(randNum==0){
+//            randNum++;
+//        }
+//        return "0.0"+randNum;
+//    }
+//
+//    public long getOmpMaxNumberByTableAndYear(SerialNumberGenerateEntity serial) {
+//        String nowYear = "";
+//        long maxNumber = 0;
+//        nowYear = DateUtil.getNowYear();
+//        Object [] params = {serial.getTableName(), Long.valueOf(nowYear)};
+//        SerialNumberGenerateEntity serialNumberGenerate = DataSet.select(SerialNumberGenerateEntity.class, "table_name=? and current_year=?", params);
+//        if(serialNumberGenerate!=null){
+//            maxNumber = serialNumberGenerate.getCurrentNumber();
+//        }
+//        if(maxNumber<=0) {//创建
+//            serial.setCurrentYear(Long.valueOf(nowYear));
+//            serial.setCurrentNumber(maxNumber+1);//将记录增加1
+//            NDataSet.insert(serial);
+//        }else{//更新
+//            serialNumberGenerate.setCurrentNumber((maxNumber + 1));
+//            Map<String,Object> fileMap = new HashMap<String, Object>();
+//            fileMap.put("tableName",serialNumberGenerate.getTableName());
+//            fileMap.put("currentNumber",serialNumberGenerate.getCurrentNumber());
+//            fileMap.put("currentYear",serialNumberGenerate.getCurrentYear());
+//            NDataSet.update(SerialNumberGenerateEntity.class, fileMap, "number_id=?", serialNumberGenerate.getNumberId());
+//        }
+//        return maxNumber+1;
+//    }
+//
+//    /**
+//     * 生成流水号,重新封装
+//     * @param identify 流水号前缀
+//     * @return
+//     */
+//    @Transaction
+//    public static synchronized String numberHelp(String identify,Object ...params){
+//        StringBuffer resultNumber = new StringBuffer();//最终返回的单号
+//        //加入前置参数
+//        for(Object obj:params){
+//            resultNumber.append(obj.toString());
+//        }
+//        //加入流水号
+//        resultNumber.append(getNextSequence(identify,SEQUENCE_LEN));
+//        //加入两位随机数
+//        resultNumber.append(getRandNum(RANDOM_LEN));
+//        return resultNumber.toString();
+//    }
+//
+//    /**
+//     * 获取流水号
+//     * @param identify,len 返回长度
+//     * @return
+//     */
+//    public static String getNextSequence(String identify,int len) {
+//        long serialNo = 0;
+//        //选出当前流水号
+//        //synchronized (this) {
+//        Object[] result = DatabaseHelper.queryArray("SELECT current_number FROM bs_sequence_number WHERE table_name=? AND current_year=?", identify, DateUtil.getNowYear());
+//        if (result == null || result.length == 0) {
+//            serialNo = 1;
+//            //插入流水号并返回
+//            if (DatabaseHelper.update("INSERT INTO bs_sequence_number(table_name,current_number,current_year) VALUES(?,?,?)", identify, serialNo, DateUtil.getNowYear()) == 0) {
+//                LogUtil.err("初始化序列号失败！");
+//            }
+//        } else {
+//            serialNo = (Long)result[0];
+//            serialNo++;
+//            //插入流水号并返回，此处后续可改为异步操作
+//            if(DatabaseHelper.update("UPDATE bs_sequence_number SET current_number=current_number+1 WHERE table_name=? AND current_year=?", identify, DateUtil.getNowYear()) == 0){
+//                LogUtil.err("更新序列号失败，TYPE={}！",identify);
+//                serialNo = 0;
+//            }
+//        }
+//        //}
+//        if(String.valueOf(serialNo).length()>len){
+//            serialNo = 0;
+//            LogUtil.err("流水号已经超长！！TYPE={}",identify);
+//        }
+//
+//        //格式化返回
+//        return zeroPrefix(len,serialNo);
+//    }
+//
+//    /**
+//     * 返回随机码,len位
+//     */
+//    private static int getRandNum(int len){
+//        if(len >9){
+//            len = 9;
+//            LogUtil.warn("最大支持随机数为9位！");
+//        }
+//        //最大数
+//        int maxDigit = (int)Math.pow(10,len);
+//        int minDigit = (int)Math.pow(10,len-1);
+//
+//        //取随机数
+//        int ret = new Random().nextInt(maxDigit-1);
+//        if(ret<minDigit) ret = ret+minDigit;
+//
+//        return ret;
+//    }
+//
+//    /**
+//     * 生成订单号和PO号使用
+//     * @param prefixLength 大于2的整数
+//     * @param number 数字，如数字（number）为2，格式化位数（prefixLength）为3，返回结果为“002”
+//     * @return
+//     */
+//    private static String zeroPrefix(int prefixLength,long number){
+//        StringBuffer result = new StringBuffer("");
+//        long max = 10L;
+//        for (int i = 2; i < prefixLength; i++) {
+//            max = max*10L;
+//        }
+//        for (long i=10L;i<=max;i*=10L){
+//            String st = i+"";
+//            if(number<i){
+//                for (int j = 0; j <=(prefixLength-st.length()) ; j++) {
+//                    result.append("0");
+//                }
+//                break;
+//            }
+//        };
+//        result.append(number);
+//        return result.toString();
+//    }
+//}

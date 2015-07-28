@@ -1,0 +1,18 @@
+//package cn.gooday.service.common;
+//
+//import cn.gooday.framework.ioc.BeanHelper;
+//
+///**
+// *
+// */
+//public class ProjectSupport {
+//
+//    public static <T> T getBean(Class<T> beanClass) {
+//        return BeanHelper.getBean(beanClass);
+//    }
+//
+////    public static UpdateOrderService getUpdateOrderService() {
+////        return BeanHelper.getBean(UpdateOrderServiceImpl.class);
+////    }
+//
+//}

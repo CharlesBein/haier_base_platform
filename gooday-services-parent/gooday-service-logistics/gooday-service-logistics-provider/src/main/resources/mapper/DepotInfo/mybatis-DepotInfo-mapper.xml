@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gooday.logistics.model.entity.DepotInfo">
+
+
+	<resultMap id="logisticsEntity" type="cn.gooday.logistics.model.entity.DepotInfo">
+        <result column="depot_info_id" property="depotInfoId" jdbcType="BIGINT" />
+        <result column="depot_info_code" property="depotInfoCode" jdbcType="VARCHAR" />
+        <result column="depot_info_name" property="depotInfoName" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="logisticsEntity">
+        SELECT depot_info_id, depot_info_code, depot_info_name
+        FROM sell_depot_info
+        WHERE depot_info_id = #{id}
+    </select>
+    
+	
+
+</mapper>

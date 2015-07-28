@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:d="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- 当前应用信息配置 -->
+    <d:application name="logistics-provider" owner="jsh" organization="gooday"/>
+    
+    <!-- 通过注册中心发现监控中心服务配置-主要用于服务监控 -->
+	<!--  <d:monitor protocol="registry" /> -->
+    
+    <!-- 注册中心信息配置 -->
+    <d:registry protocol="zookeeper" address="127.0.0.1:2181"/>
+
+    <!--<d:registry protocol="zookeeper" address="10.159.161.171:2150,10.159.161.187:2150,10.159.161.200:2150"/>-->
+    <!--<d:provider filter="cleanup" />-->
+	
+	<!-- 暴露服务协议配置 -->
+    <d:protocol name="dubbo" serialization="kryo" port="20902"/>
+
+    <d:service interface="cn.gooday.logistics.api.service.LsOrderService" ref="lsOrderService" protocol="dubbo" version="1.0.0" timeout="5000" />
+    
+    <d:service interface="cn.gooday.logistics.api.service.LsOrderService" ref="lsOrderService" protocol="dubbo" version="2.0.0" timeout="5000" />
+    <!--物流订单查询-->
+
+    <bean id="lsOrderService" class="cn.gooday.logistics.service.order.impl.LsOrderServiceImpl">
+    </bean>
+    
+    <d:service interface="cn.gooday.logistics.api.service.TestService" ref="testService" protocol="dubbo" version="2.0.0" timeout="5000" />
+     <bean id="testService" class="cn.gooday.logistics.service.test.impl.TestServiceImpl">
+    </bean>
+    
+    <d:service interface="cn.gooday.logistics.api.service.HmModelDatasetMppingIntService" ref="hmModelDatasetMppingIntService" protocol="dubbo" version="1.0" timeout="5000" />
+     <bean id="hmModelDatasetMppingIntService" class="cn.gooday.logistics.service.demo.impl.HmModelDatasetMppingIntServiceImpl">
+    </bean>
+
+
+    <!--bean id="updateService" class="cn.gooday.service.order.ProjectSupport" factory-method="getUpdateOrderService" /-->
+
+<!--     <import resource="applicationContext.xml"></import> -->
+</beans>

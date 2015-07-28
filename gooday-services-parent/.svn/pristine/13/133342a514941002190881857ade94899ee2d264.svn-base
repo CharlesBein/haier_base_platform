@@ -1,0 +1,298 @@
+package cn.gooday.service.common.util;
+
+import cn.gooday.framework.util.CastUtil;
+import cn.gooday.service.common.ServiceConstants;
+import cn.gooday.service.common.ServiceResult;
+import cn.gooday.service.common.tool.JsonMapper;
+import cn.gooday.framework.redis.RedisHelper;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.Test;
+
+import java.util.*;
+
+
+public class RedisUtil {
+
+    public static int pageSize = 50;//分页处理时每页的数据条数
+    public static int overTime = 600;
+
+    @Test
+    public void testSetRedisData(){
+        ServiceResult serviceResult = new ServiceResult();
+        String json = "";
+        json = "{\"response\":{\"status\":\"false\",\"msg\":\"error\"}}";
+//        json = "{\"response\":{\"reqno\":\"2333\",\"end\":\"false\",\"status\":{\"code\":\"2000\",\"msg\":\"success\"},\"page\":\"2,1,11\",\"data\":[{\"shop_id\":\"1\",\"shop_name\":\"one\",\"siinfos\":[{\"order_id\":\"01\"},{\"order_id\":\"02\"}]},{\"shop_id\":\"2\",\"shop_name\":\"two\",\"siinfos\":[{\"order_id\":\"03\"},{\"order_id\":\"04\"}]}]}}";
+        serviceResult.setResult(json);
+        Map param = new LinkedHashMap<>();
+        param.put("retsize",3);
+        serviceResult = setRedisData(serviceResult, "siinfos",param);
+        System.out.println("***********************************************");
+        System.out.println(serviceResult.getResult());
+//        for(int i = 0;i<5;i++) {
+//        ServiceResult result = getRedisData("2333");
+//            if(null != result) {
+//        System.out.println(result.getResult());
+//            }else {
+//                System.out.println("No DATA FOUND !");
+//            }
+//        }
+//        System.out.println("***********************************************");
+
+    }
+
+    /**
+     * 将查询数据放入redis中，并返回第一页的分页数据
+     * 参数 mainIndex为 json串中data下的主表 map名称，如api接口3.1 mainIndex 为 products
+     * @param serviceResult
+     * @param mainIndex
+     * @param param
+     */
+    public static ServiceResult setRedisData(ServiceResult serviceResult,String mainIndex,Map param) {
+        LogUtil.debug("***********数据存入redis方法开始****************");
+        try {
+            String json = (String)serviceResult.getResult();
+            if(null != param.get("retsize") && !"".equals(param.get("retsize"))){
+                pageSize = CastUtil.castInt(param.get("retsize"));
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            LinkedHashMap dataMap = null;//转成map
+            //将json串转成map
+            dataMap = (LinkedHashMap) mapper.readValue(json, Map.class);
+            if(null == dataMap){
+                LogUtil.err("***********json转换map = null ;数据存入redis方法结束****************");
+                return getErrorServiceResult(ServiceConstants.RETURN_APPLICATION_FAILURE,"cache faile!");
+            }
+            LinkedHashMap response = (LinkedHashMap) dataMap.get("response");
+            if(!response.containsKey("data")){
+                LogUtil.debug("业务数据原始json串为 {}", json);
+                LogUtil.err("json数据不包含 data 数据,不做redis分页处理，数据存入redis方法结束");
+                return serviceResult;
+            }
+            //取得 reqNo
+            String reqNo = (String) response.get("reqno");
+            //取得业务数据 data
+            List data = (List) response.get("data");
+            List subData = new ArrayList<>();
+            if(null == mainIndex){
+                //判断业务数据条数，业务数据不超过50条不存放redis
+                LogUtil.debug("数据总条数为{}",data.size());
+                if(pageSize >= data.size()){
+                    //设置page数据
+                    String pageInfo = ""+data.size()+","+ 1 +","+data.size();
+                    response.put("page",pageInfo);
+                    response.put("end","true");
+                    LogUtil.debug("数据少于{}条，不需要缓存到redis中！",pageSize);
+//                    LogUtil.debug("返回数据为 {}", JsonMapper.toNormalJson(dataMap));
+                    serviceResult.setResult(JsonMapper.toNormalJson(dataMap));
+                    LogUtil.debug("***********数据存入redis方法结束****************");
+                    return serviceResult;
+                }
+                double maxsize = pageSize;
+                int num = (int) Math.ceil(data.size()/maxsize);
+                LogUtil.debug("计算得出要存入缓存的数据共{}页",num);
+                LogUtil.debug("分页处理开始！");
+                for(int i = 0 ;i< num;i++){
+                    if (i == num-1){
+                        subData = data.subList(pageSize*(num-1),data.size());
+                        response.put("end","true");
+                    }else {
+                        subData = data.subList(pageSize*i,pageSize*(i+1));
+                        response.put("end","false");
+                    }
+                    String pageInfo = ""+subData.size()+","+ (i+1) +","+data.size();
+                    response.put("page", pageInfo);
+                    response.put("data",subData);
+                    dataMap.put("response", response);
+//                LogUtil.debug("准备缓存到redis的第{}页数据为 {}", (i + 1), JsonMapper.toNormalJson(dataMap));
+                    RedisHelper.hset(reqNo, String.valueOf(i + 1), JsonMapper.toNormalJson(dataMap));
+                }
+                LogUtil.debug("分页处理结束！");
+                RedisHelper.hset(reqNo, "num", String.valueOf(num));
+                RedisHelper.hset(reqNo, "reqTimes","1");
+                RedisHelper.expire(reqNo, overTime);//缓存数据过期时间
+            }else {
+                //业务主键按主表业务标识mainIndex分页处理
+                int datanum = 0;//业务主表数据条数
+                //循环累加主表业务数据数量
+                for(int i = 0;i<data.size();i++){
+                    LinkedHashMap businessData = (LinkedHashMap) data.get(i);
+                    if(!businessData.containsKey(mainIndex)){
+                        LogUtil.err("json串中查询以{}为key的业务数据不存在",mainIndex);
+                    }
+                    List mainDataList = (List) businessData.get(mainIndex);
+                    datanum = datanum + mainDataList.size();
+                }
+                LogUtil.debug("数据条数为{}", datanum);
+                if (pageSize >= datanum) {
+                    String pageInfo = "" + datanum + "," + 1 + "," + datanum;
+                    response.put("page", pageInfo);
+                    response.put("end", "true");
+                    dataMap.put("response", response);
+                    serviceResult.setResult(JsonMapper.toNormalJson(dataMap));
+                    LogUtil.debug("数据少于{}条，不需要缓存到redis中！",pageSize);
+//                    LogUtil.debug("数据存入redis方法返回json串为{}",JsonMapper.toNormalJson(dataMap));
+                    LogUtil.debug("***********数据存入redis方法结束****************");
+                    return serviceResult;
+                }else {
+                    double maxsize = pageSize;
+                    int num = (int) Math.ceil(datanum/maxsize);
+                    LogUtil.debug("计算得出要存入缓存的数据共{}页",num);
+                    List operateData = data;
+                    List mainDataList = new ArrayList<>();//主表信息列表
+                    List numList = new ArrayList<>();//根据主表信息个数，循环保存的头信息列表
+                    //得到主表信息列表和 每条主表信息对应的头部信息列表
+                    for (int i = 0; i < operateData.size(); i++) {//循环"data" 的list
+                        LinkedHashMap businessData = (LinkedHashMap) operateData.get(i);
+                        List mainData = (List) businessData.get(mainIndex);
+                        mainDataList.addAll(mainData);
+                        for(int j = 1;j <= mainData.size();j++){
+                            numList.add(businessData);
+                        }
+                    }
+                    LogUtil.debug("数据分页处理开始！");
+                    for (int i = 1;i <= num;i++){
+                        List mainDataList_ = new ArrayList<>();//主表信息列表
+                        List dataList_ = new ArrayList<>();//头信息列表
+                        List numList_ = new ArrayList<>();//根据主表信息个数，循环保存的头信息列表
+                        if (i == num){
+                            mainDataList_ = mainDataList.subList(pageSize*(i-1),mainDataList.size());
+                            numList_ = numList.subList(pageSize*(i-1),numList.size());
+                        }else {
+                            mainDataList_ = mainDataList.subList(pageSize*(i-1),pageSize*i);
+                            numList_ = numList.subList(pageSize*(i-1),pageSize*i);
+                        }
+                        List countData = new ArrayList<>();
+                        Object headType = numList_.get(0);//取第一条主表数据对应的头信息对象
+                        //循环处理本页主表数据
+                        for(int j = 0;j<numList_.size();j++){
+                            if(j == numList_.size()-1){//最后一条数据特殊处理
+                                if (headType != numList_.get(j)) {//最后一条与倒数第二条头部数据不同
+                                    LinkedHashMap dataInfo = (LinkedHashMap) numList_.get(j - 1);//取上一批主数据的头部信息map
+                                    dataInfo.put(mainIndex, countData);//一套头部信息与主表信息
+                                    dataList_.add(dataInfo);
+
+                                    LinkedHashMap dataInfo1 = (LinkedHashMap) numList_.get(j);
+                                    List mainList = new ArrayList<>();
+                                    mainList.add(mainDataList_.get(j));
+                                    dataInfo1.put(mainIndex, mainList);//一套头部信息与主表信息
+                                    dataList_.add(dataInfo1);
+                                }else {
+                                    Map dataInfo = new LinkedHashMap();
+                                    if(j == 0){
+                                        dataInfo = (LinkedHashMap) numList_.get(j);//取上一批主数据的头部信息map
+
+                                    }else {
+                                        dataInfo = (LinkedHashMap) numList_.get(j - 1);//取上一批主数据的头部信息map
+                                    }
+                                    countData.add(mainDataList_.get(j));
+                                    dataInfo.put(mainIndex, countData);//一套头部信息与主表信息
+                                    dataList_.add(dataInfo);
+                                }
+                                //本页最后一条数据处理结束
+                                break;
+                            }
+                            if (headType != numList_.get(j)) {//数据类型与上一条数据不相同，隶属不同的头部信息
+                                LinkedHashMap dataInfo = (LinkedHashMap) numList_.get(j - 1);//取上一批主数据的头部信息map
+                                dataInfo.put(mainIndex, countData);//一套头部信息与主表信息
+                                dataList_.add(dataInfo);
+                                countData = new ArrayList<>();//清空用于统计的主表信息list
+                            }
+                            countData.add(mainDataList_.get(j));
+                            headType = numList_.get(j);
+                        }
+
+                        String pageInfo = "" + numList_.size()+","+ i +","+mainDataList.size();
+                        response.put("page", pageInfo);
+                        if(i == num){
+                            response.put("end", "true");
+                        }else {
+                            response.put("end", "false");
+                        }
+                        response.put("data", dataList_);
+                        dataMap.put("response", response);
+//                    LogUtil.debug("准备缓存到redis的第{}页数据为 {}", i , JsonMapper.toNormalJson(dataMap));
+                        RedisHelper.hset(reqNo, String.valueOf(i), JsonMapper.toNormalJson(dataMap));
+                    }
+                    LogUtil.debug("分页处理结束！");
+                    RedisHelper.hset(reqNo, "num", String.valueOf(num));
+                    RedisHelper.hset(reqNo, "reqTimes", "1");
+                    RedisHelper.expire(reqNo, overTime);//缓存数据过期时间
+                }
+            }
+            //取第一页数据
+            String result = RedisHelper.hget(reqNo,"1");
+//        LogUtil.debug("数据存入redis的方法返回结果为{}",result);
+            serviceResult.setResult(result);
+        }catch (Throwable e){
+            LogUtil.err("setRedisData 方法出错!");
+            e.printStackTrace();
+            return getErrorServiceResult(ServiceConstants.RETURN_APPLICATION_FAILURE,"cache faile!");
+        }
+        LogUtil.debug("***********数据存入redis方法结束****************");
+        return serviceResult;
+    }
+
+    /**
+     * 从redis中读取数据，若返回结果为null代表没有缓存数据
+     * @param reqNo
+     * @return
+     */
+    public static ServiceResult getRedisData(String reqNo){
+        LogUtil.debug("***********redis取出缓存数据方法开始，reqNo = "+ reqNo +"  ****************");
+        ServiceResult result = new ServiceResult();
+        try {
+            String reqTimes = RedisHelper.hget(reqNo, "reqTimes");
+            LogUtil.debug("取redis缓存，reqTimes为 {}", reqTimes);
+            if (StringUtil.isEmpty(reqTimes)) {
+                LogUtil.debug("***********redis取出缓存数据方法结束,返回null; reqTimes = {}  ****************", reqTimes);
+                return null;
+            }
+            String num = RedisHelper.hget(reqNo, "num");
+            if (StringUtil.isEmpty(num)) {
+                LogUtil.debug("***********redis取出缓存数据方法结束,返回null; num = {}  ****************", num);
+                return null;
+            }
+            int reqTimeCount = CastUtil.castInt(reqTimes);
+            int numCount = CastUtil.castInt(num);
+            String json = RedisHelper.hget(reqNo, String.valueOf(reqTimeCount + 1));
+            if (reqTimeCount + 1 == numCount) {
+                LogUtil.debug("第{}次取缓存数据结束，已清空redis缓存！", (reqTimeCount + 1));
+                RedisHelper.del(reqNo);
+            }
+            if (reqTimeCount + 1 < numCount) {
+                RedisHelper.hset(reqNo, "reqTimes", String.valueOf(reqTimeCount + 1));
+            }
+            if (!StringUtil.isEmpty(json)) {
+                result.setResult(json);
+                LogUtil.debug("第{}次取redis缓存成功", (reqTimeCount + 1));
+                LogUtil.debug("***********redis取出缓存数据方法结束****************");
+                return result;
+            } else {
+                LogUtil.debug("***********redis取出缓存数据方法结束****************");
+                return null;
+            }
+        }catch (Throwable e){
+            LogUtil.err("getRedisData 方法出错!");
+            e.printStackTrace();
+            return getErrorServiceResult(ServiceConstants.RETURN_APPLICATION_FAILURE,"cache faile!");
+        }
+    }
+
+    public static ServiceResult getErrorServiceResult(int code,String msg){
+        Map statusData = new LinkedHashMap<>();
+        statusData.put("code",code);
+        statusData.put("msg",msg);
+
+        Map data = new LinkedHashMap<>();
+        //从二级开始组织数据，遇到有下级就另开方法组织数据
+        data.put("status",statusData);
+        Map jsonTopMap = new HashMap();
+        jsonTopMap.put("response", data);
+
+        ServiceResult serviceResult = new ServiceResult();
+        serviceResult.setResult(JsonMapper.toNormalJson(jsonTopMap));
+        serviceResult.setCode(ServiceConstants.RETURN_APPLICATION_FAILURE);
+        return serviceResult;
+    }
+
+}

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-cluster-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-common-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-config-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-config-spring-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-container-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-container-javaconfig-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-container-jetty-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-container-log4j-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-container-logback-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-container-spring-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-demo-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-filter-cache-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-filter-validation-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-monitor-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-monitor-default-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-registry-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-registry-default-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-registry-multicast-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-registry-redis-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-registry-zookeeper-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-grizzly-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-http-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-mina-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-netty-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-p2p-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-remoting-zookeeper-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-api-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-default-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-hessian-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-http-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-injvm-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-memcached-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-redis-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-rest-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-rmi-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-thrift-2.8.3.jar"/>
+	<classpathentry kind="lib" path="/gooday-services-parent/lib/dubbo2.8.3/dubbo-rpc-webservice-2.8.3.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

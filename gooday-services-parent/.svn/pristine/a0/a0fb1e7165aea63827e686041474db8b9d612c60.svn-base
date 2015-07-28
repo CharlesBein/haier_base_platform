@@ -1,0 +1,39 @@
+framework.app.base_package=cn.gooday.service
+framework.custom.ds_factory=cn.gooday.framework.plugin.druid.DruidDataSourceFactory
+framework.jdbc.driver=com.mysql.jdbc.Driver
+framework.jdbc.maxActive=400
+framework.jdbc.maxWait=500
+
+jdbc.initialSize=1
+jdbc.minIdle=1
+
+################################# FOR IDC START #########################
+#framework.jdbc.url=jdbc:mysql://10.159.161.197:3306/jsh_test
+#framework.jdbc.username=jan
+#framework.jdbc.password=jsh#123!good
+
+#framework.redis.url=redis://:password@10.159.161.181:6379/0?clientName=open&maxActive=40&maxWait=400
+################################# FOR IDC END  #########################
+
+#framework.jdbc.url=jdbc:mysql://192.168.0.243:3306/jsh_dev
+#framework.jdbc.username=rrs
+#framework.jdbc.password=rrs
+framework.jdbc.url=jdbc:mysql://127.0.0.1:3306/gooday-test
+framework.jdbc.username=root
+framework.jdbc.password=root
+jdbc.dialect=mysql
+
+################################# FOR FORMAL START #########################
+#framework.jdbc.url=jdbc:mysql://10.159.33.201:3306/gooday-application
+#framework.jdbc.username=app_user
+#framework.jdbc.password=app_Ju?ShaNg!hUi
+
+framework.redis.url=redis://:JshPassRedis00@10.159.161.162:6379/0?clientName=open&maxActive=100&maxWait=400
+################################# FOR FORMAL END #########################
+################################# FOR 240 START #########################
+#framework.jdbc.url=jdbc:mysql://58.135.80.27:3306/jsh_dev
+#framework.jdbc.username=rrs
+#framework.jdbc.password=rrs
+
+#framework.redis.url=redis://:@192.168.0.240:6379/0?clientName=open&maxActive=40&maxWait=400
+################################# FOR 240 END #########################
